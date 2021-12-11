@@ -47,8 +47,7 @@
 				
 				
 					if($pdlist){
-					
-							while ($result = $pdlist->fetch_assoc()){
+					foreach($pdlist as $result){
 								$i++;
 									
 									
@@ -57,7 +56,7 @@
 					<td><?php echo $i ?></td>
 					<td><?php echo $result['product_code'] ?></td>
 					<td><?php echo $result['productName'] ?></td>
-					<td><a href="productmorequantity.php?productid=<?php echo $result['productId'] ?>">Nhập hàng</a></td>
+					<td><a href="productmorequantity.php?productid=<?php echo $result['_id'] ?>">Nhập hàng</a></td>
 					<td>
 						<?php echo $result['productQuantity'] ?>
 
@@ -72,8 +71,8 @@
 					</td>
 					<td><?php echo $result['price'] ?></td>
 					<td><img src="uploads/<?php echo $result['image'] ?>" width="80"></td>
-					<td><?php echo $result['catName'] ?></td>
-					<td><?php echo $result['brandName'] ?></td>
+					<td><?php echo $result['cat'] ?></td>
+					<td><?php echo $result['brand'] ?></td>
 					
 					<td><?php 
 						if($result['type']==0){
@@ -84,7 +83,7 @@
 
 					?></td>
 					
-					<td><a href="productedit.php?productid=<?php echo $result['productId'] ?>">Sửa</a> || <a  onclick = "return confirm('Bạn chắc chắn muốn xóa ?')" href="?productid=<?php echo $result['productId'] ?>">Xóa</a></td>
+					<td><a href="productedit.php?productid=<?php echo $result['_id'] ?>">Sửa</a> || <a  onclick = "return confirm('Bạn chắc chắn muốn xóa ?')" href="?productid=<?php echo $result['_id'] ?>">Xóa</a></td>
 				</tr>
 				<?php
 							

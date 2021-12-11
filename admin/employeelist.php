@@ -39,7 +39,7 @@
 							$list_employee = $employee -> list_employee();
 							if($list_employee){
 								$i = 0;
-								while($result = $list_employee -> fetch_assoc()){
+                                foreach($list_employee as $result){
 									$i++;
 								
 						?>
@@ -47,7 +47,7 @@
 							<td><?php echo $i; ?></td>
 							<td><?php echo $result['adminName']; ?></td>
 							<td><?php echo $result['adminEmail']; ?></td><td><?php echo $result['adminUser']; ?></td><td><?php echo $result['adminPass']; ?></td>
-							<td><a href="employeeedit.php?adminId=<?php echo $result['adminId']; ?>">Sửa</a> || <a onclick = "return confirm('Bạn chắc chắn muốn xóa ?')" href="?delid=<?php echo $result['adminId'] ?>">Xóa</a></td>
+							<td><a href="employeeedit.php?adminId=<?php echo $result['_id']; ?>">Sửa</a> || <a onclick = "return confirm('Bạn chắc chắn muốn xóa ?')" href="?delid=<?php echo $result['_id'] ?>">Xóa</a></td>
 						</tr>
 						<?php 
 							}

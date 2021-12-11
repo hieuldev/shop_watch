@@ -59,10 +59,9 @@
                             $cat = new category();
                             $catlist = $cat->show_category();
                             if($catlist){
-                                while ($result = $catlist->fetch_assoc()){
-                            
+                            foreach($catlist as $result){
                              ?>
-                            <option value=" <?php echo $result['catId'] ?> "> <?php echo $result['catName'] ?> </option>
+                            <option value=" <?php echo $result['catName'] ?> "> <?php echo $result['catName'] ?> </option>
                             
                             <?php 
                             }
@@ -82,10 +81,9 @@
                             $brand = new brand();
                             $brandlist = $brand->show_brand();
                             if($brandlist){
-                                while ($result = $brandlist->fetch_assoc()){
-                            
+                               foreach($brandlist as $result){
                              ?>
-                            <option value=" <?php echo $result['brandId'] ?> "> <?php echo $result['brandName'] ?> </option>
+                            <option value=" <?php echo $result['brandName'] ?> "> <?php echo $result['brandName'] ?> </option>
                             
                             <?php 
                             }

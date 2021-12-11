@@ -27,11 +27,8 @@
             }
          ?>
          <?php 
-         $get_product_by_id = $pd->getproductbyId($id);
-         if($get_product_by_id){
-            while ($result_product = $get_product_by_id->fetch_assoc()) {
-                # code...
-            
+         $result_product = $pd->getproductbyId($id);
+         if($result_product){
           ?>   
         <div class="block">
 
@@ -73,15 +70,14 @@
                             $cat = new category();
                             $catlist = $cat->show_category();
                             if($catlist){
-                                while ($result = $catlist->fetch_assoc()){
-                            
+                            foreach($catlist as $result){
                              ?>
                             <option 
                             <?php 
-                            if($result['catId']==$result_product['catId'])
+                            if($result['catName']==$result_product['cat'])
                                 { echo 'selected'; }
                              ?>    
-                            value=" <?php echo $result['catId'] ?> "> <?php echo $result['catName'] ?></option>
+                            value=" <?php echo $result['catName'] ?> "> <?php echo $result['catName'] ?></option>
                             
                             <?php 
                             }
@@ -101,19 +97,18 @@
                             $brand = new brand();
                             $brandlist = $brand->show_brand();
                             if($brandlist){
-                                while ($result = $brandlist->fetch_assoc()){
-                            
+                            foreach($brandlist as $result){
                              ?>
                             <option
                             <?php 
-                            if($result['brandId']==$result_product['brandId'])
+                            if($result['brandName']==$result_product['brand'])
                                 { echo 'selected'; }
                              ?> 
-                             value=" <?php echo $result['brandId'] ?> "> <?php echo $result['brandName'] ?> </option>
+                             value=" <?php echo $result['brandName'] ?> "> <?php echo $result['brandName'] ?> </option>
                             
                             <?php 
                             }
-                             }
+                             
                              ?>
                         </select>
                     </td>

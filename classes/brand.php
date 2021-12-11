@@ -22,7 +22,7 @@
 			$brandName = $this->fm->validation($data['brandName']); //gọi ham validation để ktra có rỗng hay ko để ktra
             $topBrand = $this->fm->validation($data['type']);
 			
-			if(empty($brandName)&&empty($$topBrand)){
+			if(empty($brandName)&&empty($topBrand)){
 				$alert = "<span class='error'>Không được để trống</span>";
 				return $alert;
 			}

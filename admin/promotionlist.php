@@ -39,17 +39,17 @@
 							$list_promotion = $promotion -> show_promotion();
 							if($list_promotion){
 								$i = 0;
-								while($result = $list_promotion -> fetch_assoc()){
+								foreach($list_promotion as $result){
 									$i++;
 								
 						?>
 						<tr class="odd gradeX">
 							<td><?php echo $i; ?></td>
 							<td><?php echo $result['PromotionDate']; ?></td>
-							<td><?php echo $result['productId']; ?></td>
+							<td><?php echo $result['product']; ?></td>
                             <td><?php echo $result['PromotionPrice']; ?></td>
                             <td><?php echo $result['expiredTimeout']; ?></td>
-							<td><a onclick = "return confirm('Bạn chắc chắn muốn xóa ?')" href="?delid=<?php echo $result['PromotionId'] ?>">Xóa</a></td>
+							<td><a onclick = "return confirm('Bạn chắc chắn muốn xóa ?')" href="?delid=<?php echo $result['_id'] ?>">Xóa</a></td>
 						</tr>
 						<?php 
 							}

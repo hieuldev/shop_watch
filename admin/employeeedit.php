@@ -25,12 +25,8 @@
             }
          ?>
          <?php 
-         $get_employee_by_id = $employee->getemployeebyId($id);
-         if($get_employee_by_id){
-            while ($result = $get_employee_by_id->fetch_assoc()) {
-                # code...
-            
-          ?>   
+         $result = $employee->getemployeebyId($id);
+         if($result){?>  
         <div class="block">
 
          <form action="" method="post">
@@ -80,7 +76,7 @@
             </form>
             <?php 
             }
-            }
+        
              ?>
         </div>
     </div>

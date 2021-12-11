@@ -23,13 +23,9 @@
             <table class="data display datatable" id="example">
 			<thead>
 				<tr>
-					<th>ID</th>
+					<th>STT</th>
 					<th>Code sản phẩm</th>
 					<th>Tên sản phẩm</th>
-				
-					<th>Số lượng ban đầu</th>
-					<th>Đã bán</th>
-				
 					<th>Số lượng trước nhập</th>
 					<th>Số lượng thêm</th>
 					<th>Số lượng sau nhập</th>
@@ -45,35 +41,20 @@
 				
 				$pdlist = $pd->show_product_warehouse();
 				$i = 0;
-				
-				
 					if($pdlist){
-					
-							while ($result = $pdlist->fetch_assoc()){
-								$i++;
-									
-									
+					foreach($pdlist as $result){
+								$i++;					
 				 ?>
 				<tr class="odd gradeX">
 					<td><?php echo $i ?></td>
 					<td><?php echo $result['product_code'] ?></td>
-					<td><?php echo $result['productName'] ?></td>
-					
+					<td><?php echo $result['product'] ?></td>				
 					<td>
-						<?php echo $result['productQuantity'] ?>
+						<?php echo $result['product_remain'] - $result['import_quantity'] ?>
 
 					</td>
 					<td>
-						<?php echo $result['product_soldout'] ?>
-
-					</td>
-					
-					<td>
-						<?php echo $result['product_remain'] - $result['sl_nhap'] ?>
-
-					</td>
-					<td>
-						<?php echo $result['sl_nhap'] ?>
+						<?php echo $result['import_quantity'] ?>
 
 					</td>
 					<td>
@@ -81,7 +62,7 @@
 
 					</td>
 					<td>
-						<?php echo $result['sl_ngaynhap'] ?>
+						<?php echo $result['createTime'] ?>
 
 					</td>
 					
