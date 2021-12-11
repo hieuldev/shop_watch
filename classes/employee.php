@@ -16,17 +16,18 @@
 		private $fm;
 		public function __construct()
 		{
-			$this->db = new Database();
+			$database=new Database();
+            $this->db=$database->data->tbl_admin;
 			$this->fm = new Format();
 		}
 public function insert_employee($data){
 			
-			$adminName = mysqli_real_escape_string($this->db->link, $data['adminName']);
-			$adminEmail = mysqli_real_escape_string($this->db->link, $data['adminEmail']);
+			$adminName = $this->fm->validation($data['adminName']);
+			$adminEmail = $this->fm->validation($data['adminEmail']);
 
-			$adminUser = mysqli_real_escape_string($this->db->link, $data['adminUser']);
-			$adminPass = md5(mysqli_real_escape_string($this->db->link, $data['adminPass']));
-			
+			$adminUser = $this->fm->validation($data['adminUser']);
+			$adminPass = md5($this->fm->validation($data['adminPass']));
+			$check = $this->db->findOne(['adminUser'=>$adminUser]);
 			 //mysqli gọi 2 biến. (catName and link) biến link -> gọi conect db từ file db
 			
 			// kiểm tra hình ảnh và lấy hình ảnh cho vào folder upload
@@ -34,9 +35,15 @@ public function insert_employee($data){
 			if($adminName =="" || $adminEmail == "" || $adminUser == "" || $adminPass == "" ){
 				$alert = "<span class='error'>Không được để trống</span>";
 				return $alert;
-			}else{
-				$query = "INSERT INTO tbl_admin(adminName,adminEmail,adminUser,adminPass,RankId) VALUES('$adminName','$adminEmail','$adminUser','$adminPass','2') ";
-				$result = $this->db->insert($query);
+			}else if($check)
+            {
+                $alert = "<span class='error'>User đã tồn tại</span>";
+				return $alert;
+}
+    
+    else{
+                
+				$result = $this->db->insertOne(['adminName'=>$adminName,'adminEmail'=>$adminEmail,'adminUser'=>$adminUser,'adminPass'=>$adminPass,'RankId'=>'2']);
 				if($result){
 					$alert = "<span class='success'>Thêm nhân viên thành công</span>";
 					return $alert;
@@ -48,14 +55,12 @@ public function insert_employee($data){
 		}
 		public function list_employee()
 		{
-			$query = "SELECT * FROM `tbl_admin` WHERE RankId='2'";
-			$result = $this->db->select($query);
+			$result = $this->db->find();
 			return $result;
 		}
         public function del_employee($id)
 		{
-			$query = "DELETE FROM tbl_admin where adminId = '$id' ";
-			$result = $this->db->delete($query);
+			$result = $this->db->deleteOne(['_id'=>new MongoDB\BSON\ObjectId($id)]);
 			if($result){
 				$alert = "<span class='success'>Xóa nhân viên thành công</span>";
 				return $alert;
@@ -66,18 +71,17 @@ public function insert_employee($data){
 		}
         public function update_employee($data,$id)
 		{
-			$adminName = mysqli_real_escape_string($this->db->link, $data['adminName']);
-			$adminEmail = mysqli_real_escape_string($this->db->link, $data['adminEmail']);
+			$adminName = $this->fm->validation($data['adminName']);
+			$adminEmail = $this->fm->validation($data['adminEmail']);
 
-			$adminUser = mysqli_real_escape_string($this->db->link, $data['adminUser']);
-			$adminPass = md5(mysqli_real_escape_string($this->db->link, $data['adminPass']));
-			$id = mysqli_real_escape_string($this->db->link, $id);
+			$adminUser = $this->fm->validation($data['adminUser']);
+			$adminPass = md5($this->fm->validation($data['adminPass']));
+            $id=$this->fm->validation($id);
 			if(empty($adminName)&&empty($adminEmail)&&empty($adminUser)&&empty($adminPass)){
 				$alert = "<span class='error'>Không được để trống</span>";
 				return $alert;
 			}else{
-				$query = "UPDATE tbl_admin SET adminName= '$adminName',adminEmail='$adminEmail',adminUser='$adminUser',adminPass='$adminPass' WHERE adminId = '$id' ";
-				$result = $this->db->update($query);
+				$result = $this->db->updateOne(['_id'=>new MongoDB\BSON\ObjectId($id)],['$set'=>['adminName'=>$adminName,'adminEmail'=>$adminEmail,'adminUser'=>$adminUser,'adminPass'=>$adminPass]]);
 				if($result){
 					$alert = "<span class='success'>Cập nhật nhân viên thành công</span>";
 					return $alert;
@@ -90,8 +94,7 @@ public function insert_employee($data){
 		}
         public function getemployeebyId($id)
 		{
-			$query = "SELECT * FROM tbl_admin where adminId = '$id' ";
-			$result = $this->db->select($query);
+			$result = $this->db->findOne(['_id'=>new MongoDB\BSON\ObjectId($id)]);
 			return $result;
 		}
 	}

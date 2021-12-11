@@ -15,7 +15,7 @@
     } 
     if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])){
         // LẤY DỮ LIỆU TỪ PHƯƠNG THỨC Ở FORM POST
-        $updatemoreProduct = $pd->update_quantity_product($_POST, $_FILES, $id); // hàm check catName khi submit lên
+        $updatemoreProduct = $pd->update_quantity_product($_POST,$id); // hàm check catName khi submit lên
     }
   ?>
 <div class="grid_10">
@@ -27,11 +27,8 @@
             }
          ?>
          <?php 
-         $get_product_by_id = $pd->getproductbyId($id);
-         if($get_product_by_id){
-            while ($result_product = $get_product_by_id->fetch_assoc()) {
-                # code...
-            
+         $result_product = $pd->getproductbyId($id);
+         if($result_product){
           ?>   
         <div class="block">
 
@@ -88,7 +85,7 @@
             </form>
             <?php 
             }
-            }
+            
              ?>
         </div>
     </div>

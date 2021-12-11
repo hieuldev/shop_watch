@@ -41,7 +41,7 @@
 					$get_slider = $product->show_slider_list();
 					if($get_slider){
 						$i = 0;
-						while($result_slider = $get_slider->fetch_assoc()){
+						foreach($get_slider as $result_slider){
 							$i++;
 						?>
 				<tr class="odd gradeX">
@@ -52,11 +52,11 @@
 						<?php
 						if($result_slider['type']==1){
 						?>
-						<a href="?type_slider=<?php echo $result_slider['sliderId'] ?>&type=0">Tắt</a> 
+						<a href="?type_slider=<?php echo $result_slider['_id'] ?>&type=0">Tắt</a> 
 						<?php
 						 }else{
 						?>	
-						<a href="?type_slider=<?php echo $result_slider['sliderId'] ?>&type=1">Bật</a> 
+						<a href="?type_slider=<?php echo $result_slider['_id'] ?>&type=1">Bật</a> 
 						<?php
 						}
 						?>
@@ -64,7 +64,7 @@
 					</td>		
 				<td>
 					
-					<a href="?slider_del=<?php echo $result_slider['sliderId'] ?>" onclick="return confirm('Bạn chắc chắn muốn xóa ?');" >Xóa</a> 
+					<a href="?slider_del=<?php echo $result_slider['_id'] ?>" onclick="return confirm('Bạn chắc chắn muốn xóa ?');" >Xóa</a> 
 				</td>
 					</tr>
 				<?php

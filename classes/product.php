@@ -11,24 +11,31 @@
 	class product
 	{
 		private $db;
+		private $dbWarehose;
+		private $dbSlider;
+		private $dbPromotion;
 		private $fm;
 		public function __construct()
 		{
-			$this->db = new Database();
+			$database=new Database();
+            $this->db=$database->data->tbl_product;
+			$this->dbWarehose=$database->data->tbl_warehouse;
+			$this->dbSlider=$database->data->tbl_slider;
+			$this->dbPromotion=$database->data->tbl_promotion;
 			$this->fm = new Format();
 		}
 
 		public function insert_product($data,$files){
 			
-			$productName = mysqli_real_escape_string($this->db->link, $data['productName']);
-			$product_code = mysqli_real_escape_string($this->db->link, $data['product_code']);
+			$productName = $this->fm->validation( $data['productName']);
+			$product_code = $this->fm->validation( $data['product_code']);
 
-			$productQuantity = mysqli_real_escape_string($this->db->link, $data['productQuantity']);
-			$category = mysqli_real_escape_string($this->db->link, $data['category']);
-			$brand = mysqli_real_escape_string($this->db->link, $data['brand']);
-			$product_desc = mysqli_real_escape_string($this->db->link, $data['product_desc']);
-			$price = mysqli_real_escape_string($this->db->link, $data['price']);
-			$type = mysqli_real_escape_string($this->db->link, $data['type']);
+			$productQuantity = $this->fm->validation($data['productQuantity']);
+			$category = $this->fm->validation( $data['category']);
+			$brand = $this->fm->validation( $data['brand']);
+			$product_desc = $this->fm->validation( $data['product_desc']);
+			$price = $this->fm->validation( $data['price']);
+			$type = $this->fm->validation( $data['type']);
 			 //mysqli gọi 2 biến. (catName and link) biến link -> gọi conect db từ file db
 			
 			// kiểm tra hình ảnh và lấy hình ảnh cho vào folder upload
@@ -47,11 +54,9 @@
 				return $alert;
 			}else{
 				move_uploaded_file($file_temp, $uploaded_image);
-
-				$query = "INSERT INTO tbl_product(productName,product_code,product_remain,productQuantity,catId,brandId,product_desc,price,type,image) VALUES('$productName','$product_code','$productQuantity','$productQuantity','$category','$brand','$product_desc','$price','$type','$unique_image') ";
-				$result = $this->db->insert($query);
+				$result = $this->db->insertOne(['productName'=>$productName,'product_code'=>$product_code,'product_remain'=>$productQuantity,'productQuantity'=>$productQuantity,'product_soldout'=>'0','cat'=>$category,'brand'=>$brand,'product_desc'=>$product_desc,'price'=>$price,'type'=>$type,'image'=>$unique_image]);
 				if($result){
-					$alert = "<span class='success'>Thêm sản phầm thành công</span>";
+					$alert = "<span class='success'>Thêm sản phẩm thành công</span>";
 					return $alert;
 				}else {
 					$alert = "<span class='error'>Thêm sản phẩm thất bại</span>";
@@ -61,8 +66,8 @@
 		}
 		public function insert_slider($data,$files)
 		{
-			$sliderName = mysqli_real_escape_string($this->db->link, $data['sliderName']);
-			$type = mysqli_real_escape_string($this->db->link, $data['type']);
+			$sliderName = $this->fm->validation( $data['sliderName']);
+			$type = $this->fm->validation( $data['type']);
 			 //mysqli gọi 2 biến. (catName and link) biến link -> gọi conect db từ file db
 			
 			// kiểm tra hình ảnh và lấy hình ảnh cho vào folder upload
@@ -80,7 +85,7 @@
 
 
 			if($sliderName=="" || $type==""){
-				$alert = "<span class='error'>Không được để tr</span>";
+				$alert = "<span class='error'>Không được để trống</span>";
 				return $alert; 
 			}else{
 				if(!empty($file_name)){
@@ -97,9 +102,7 @@
 					return $alert;
 					}
 					move_uploaded_file($file_temp,$uploaded_image);
-					
-					$query = "INSERT INTO tbl_slider(sliderName,type,slider_image) VALUES('$sliderName','$type','$unique_image') ";
-					$result = $this->db->insert($query);
+					$result =$this->dbSlider->insertOne(['sliderName'=>$sliderName,'type'=>$type,'slider_image'=>$unique_image]);
 					if($result){
 						$alert = "<span class='success'>Thêm Slider thành công</span>";
 						return $alert;
@@ -119,20 +122,11 @@
 			return $result;
 		}
 		public function show_slider_list(){
-			$query = "SELECT * FROM tbl_slider order by sliderId desc";
-			$result = $this->db->select($query);
+			$result = $this->dbSlider->find();
 			return $result;
 		}
 		public function show_product_warehouse(){
-			$query = 
-			"SELECT tbl_product.*, tbl_warehouse.*
-
-			 FROM tbl_product INNER JOIN tbl_warehouse ON tbl_product.productId = tbl_warehouse.productId
-								
-			 order by tbl_warehouse.sl_ngaynhap desc ";
-
-		
-			$result = $this->db->select($query);
+			$result = $this->dbWarehose->find();
 			return $result;
 		}
         public function importstatements($id){
@@ -148,28 +142,18 @@
         
 		public function show_product()
 		{
-			$query = 
-			"SELECT tbl_product.*, tbl_category.catName, tbl_brand.brandName
-
-			 FROM tbl_product INNER JOIN tbl_category ON tbl_product.catId = tbl_category.catId
-								INNER JOIN tbl_brand ON tbl_product.brandId = tbl_brand.brandId
-			 order by tbl_product.productId desc ";
-
-			// $query = "SELECT * FROM tbl_product order by productId desc ";
-			$result = $this->db->select($query);
+			$result = $this->db->find();
 			return $result;
 		}
 		public function update_type_slider($id,$type){
 
-			$type = mysqli_real_escape_string($this->db->link, $type);
-			$query = "UPDATE tbl_slider SET type = '$type' where sliderId='$id'";
-			$result = $this->db->update($query);
+			$type = $this->fm->validation( $type);
+			$result = $this->dbSlider->updateOne(['_id'=>new MongoDB\BSON\ObjectId($id)],['$set'=>['type'=>$type]]);
 			return $result;
 		}
 		public function del_slider($id)
 		{
-			$query = "DELETE FROM tbl_slider where sliderId = '$id' ";
-			$result = $this->db->delete($query);
+			$result = $this->dbSlider->deleteOne(['_id'=>new MongoDB\BSON\ObjectId($id)]);
 			if($result){
 				$alert = "<span class='success'>Xóa Slider thành công</span>";
 				return $alert;
@@ -178,27 +162,21 @@
 				return $alert;
 			}
 		}
-		public function update_quantity_product($data,$files,$id){
-			$product_more_quantity = mysqli_real_escape_string($this->db->link, $data['product_more_quantity']);
-			$product_remain = mysqli_real_escape_string($this->db->link, $data['product_remain']);
-			$unit_price=mysqli_real_escape_string($this->db->link, $data['unit_price']);
+		public function update_quantity_product($data,$id){
+			$product = $this->fm->validation( $data['productName']);
+			$product_code = $this->fm->validation( $data['product_code']);
+			$product_more_quantity = $this->fm->validation( $data['product_more_quantity']);
+			$product_remain = $this->fm->validation( $data['product_remain']);
+			$unit_price=$this->fm->validation( $data['unit_price']);
 			if($product_more_quantity == ""){
 
 				$alert = "<span class='error'>Không được để trống</span>";
 				return $alert; 
 			}else{
 					$qty_total = $product_more_quantity + $product_remain;
-					//Nếu người dùng không chọn ảnh
-					$query = "UPDATE tbl_product SET
-					
-					product_remain = '$qty_total'
-
-					WHERE productId = '$id'";
-					
+					$result = $this->db->updateOne(['_id'=>new MongoDB\BSON\ObjectId($id)],['$set'=>['product_remain'=>$qty_total]]);
 					}
-					$query_warehouse = "INSERT INTO tbl_warehouse(productId,sl_nhap,unit_price) VALUES('$id','$product_more_quantity','$unit_price') ";
-					$result_insert = $this->db->insert($query_warehouse);
-					$result = $this->db->update($query);
+					$result =$this->dbWarehose->insertOne(['product'=>$product,'product_code'=>$product_code,'product_remain'=>$product_remain,'import_quantity'=>$product_more_quantity,'unit_price'=>$unit_price,'createTime'=>date("Y-m-d H:i:s")]);
 
 					if($result){
 						$alert = "<span class='success'>Thêm số lượng thành công</span>";
@@ -211,14 +189,14 @@
 		}
 		public function update_product($data,$files,$id){
 	
-			$productName = mysqli_real_escape_string($this->db->link, $data['productName']);
-			$product_code = mysqli_real_escape_string($this->db->link, $data['product_code']);
-			$productQuantity = mysqli_real_escape_string($this->db->link, $data['productQuantity']);
-			$brand = mysqli_real_escape_string($this->db->link, $data['brand']);
-			$category = mysqli_real_escape_string($this->db->link, $data['category']);
-			$product_desc = mysqli_real_escape_string($this->db->link, $data['product_desc']);
-			$price = mysqli_real_escape_string($this->db->link, $data['price']);
-			$type = mysqli_real_escape_string($this->db->link, $data['type']);
+			$productName = $this->fm->validation( $data['productName']);
+			$product_code = $this->fm->validation( $data['product_code']);
+			$productQuantity = $this->fm->validation( $data['productQuantity']);
+			$brand = $this->fm->validation( $data['brand']);
+			$category = $this->fm->validation( $data['category']);
+			$product_desc = $this->fm->validation( $data['product_desc']);
+			$price = $this->fm->validation( $data['price']);
+			$type = $this->fm->validation( $data['type']);
 			//Kiem tra hình ảnh và lấy hình ảnh cho vào folder upload
 			$permited  = array('jpg', 'jpeg', 'png', 'gif');
 
@@ -251,36 +229,7 @@
 					return $alert;
 					}
 					move_uploaded_file($file_temp,$uploaded_image);
-					$query = "UPDATE tbl_product SET
-					productName = '$productName',
-					product_code = '$product_code',
-					productQuantity = '$productQuantity',
-					brandId = '$brand',
-					catId = '$category', 
-					type = '$type', 
-					price = '$price', 
-					image = '$unique_image',
-					product_desc = '$product_desc'
-					WHERE productId = '$id'";
-					
-				}else{
-					//Nếu người dùng không chọn ảnh
-					$query = "UPDATE tbl_product SET
-
-					productName = '$productName',
-					product_code = '$product_code',
-					productQuantity = '$productQuantity',
-					brandId = '$brand',
-					catId = '$category', 
-					type = '$type', 
-					price = '$price', 
-					
-					product_desc = '$product_desc'
-
-					WHERE productId = '$id'";
-					
-				}
-				$result = $this->db->update($query);
+					$result = $this->db->updateOne(['_id'=>new MongoDB\BSON\ObjectId($id)],['$set'=>['productName'=>$productName,'product_code'=>$product_code,'product_remain'=>$productQuantity,'productQuantity'=>$productQuantity,'product_soldout'=>'0','cat'=>$category,'brand'=>$brand,'product_desc'=>$product_desc,'price'=>$price,'type'=>$type,'image'=>$unique_image]]);
 					if($result){
 						$alert = "<span class='success'>Sản phẩm được cập nhật thành công</span>";
 						return $alert;
@@ -288,14 +237,23 @@
 						$alert = "<span class='error'>Sản phẩm được cập nhật thất bại</span>";
 						return $alert;
 					}
-				
+				}else{
+					//Nếu người dùng không chọn ảnh
+					$result = $this->db->updateOne(['_id'=>new MongoDB\BSON\ObjectId($id)],['$set'=>['productName'=>$productName,'product_code'=>$product_code,'product_remain'=>$productQuantity,'productQuantity'=>$productQuantity,'product_soldout'=>'0','cat'=>$category,'brand'=>$brand,'product_desc'=>$product_desc,'price'=>$price,'type'=>$type]]);
+					if($result){
+						$alert = "<span class='success'>Sản phẩm được cập nhật thành công</span>";
+						return $alert;
+					}else{
+						$alert = "<span class='error'>Sản phẩm được cập nhật thất bại</span>";
+						return $alert;
+					}
+				}
 			}
 
 		}
 		public function del_product($id)
 		{
-			$query = "DELETE FROM tbl_product where productId = '$id' ";
-			$result = $this->db->delete($query);
+			$result = $this->db->deleteOne(['_id'=>new MongoDB\BSON\ObjectId($id)]);
 			if($result){
 				$alert = "<span class='success'>Sản phẩm được xóa thành công</span>";
 				return $alert;
@@ -312,8 +270,7 @@
 		}
 		public function getproductbyId($id)
 		{
-			$query = "SELECT * FROM tbl_product where productId = '$id' ";
-			$result = $this->db->select($query);
+			$result = $this->db->findOne(['_id'=>new MongoDB\BSON\ObjectId($id)]);
 			return $result;
 		}		
 		//Kết thúc Backend
@@ -416,8 +373,8 @@
 		}
 		public function insertCompare($productid, $customer_id)
 		{
-			$productid = mysqli_real_escape_string($this->db->link, $productid);
-			$customer_id = mysqli_real_escape_string($this->db->link, $customer_id);
+			$productid = $this->fm->validation( $productid);
+			$customer_id = $this->fm->validation( $customer_id);
 			
 			$check_compare = "SELECT * FROM tbl_compare WHERE productId = '$productid' AND customer_id ='$customer_id'";
 			$result_check_compare = $this->db->select($check_compare);
@@ -451,8 +408,8 @@
 		}
 		public function insertWishlist($productid, $customer_id)
 		{
-			$productid = mysqli_real_escape_string($this->db->link, $productid);
-			$customer_id = mysqli_real_escape_string($this->db->link, $customer_id);
+			$productid = $this->fm->validation( $productid);
+			$customer_id = $this->fm->validation( $customer_id);
 			
 			$check_wlist = "SELECT * FROM tbl_wishlist WHERE productId = '$productid' AND customer_id ='$customer_id'";
 			$result_check_wlist = $this->db->select($check_wlist);
@@ -517,25 +474,27 @@
 			return $result;
 		}
         public function show_promotion(){
-			$query = "SELECT * FROM `tbl_promotion`";
-			$result = $this->db->select($query);
+			$result = $this->dbPromotion->find();
 			return $result;
 		}
         public function insert_promotion($data){
 			
-			$productId = mysqli_real_escape_string($this->db->link, $data['productId']);
-			$PromotionPrice = mysqli_real_escape_string($this->db->link, $data['PromotionPrice']);
-
-			$expiredTimeout = mysqli_real_escape_string($this->db->link, $data['expiredTimeout']);
+			$product = $this->fm->validation( $data['product']);
+			$PromotionPrice = $this->fm->validation( $data['PromotionPrice']);
+			$promotionDate = $this->fm->validation( $data['PromotionDate']);
+			$expiredTimeout = $this->fm->validation( $data['expiredTimeout']);
 			
 
-			if($productId =="" || $PromotionPrice == "" || $expiredTimeout == "" ){
+			if($product =="" || $PromotionPrice == "" || $expiredTimeout == "" ){
 				$alert = "<span class='error'>Không được để trống</span>";
 				return $alert;
-			}else{
-				
-				$query = "INSERT INTO tbl_promotion(productId,PromotionPrice,expiredTimeout) VALUES('$productId','$PromotionPrice','$expiredTimeout') ";
-				$result = $this->db->insert($query);
+			}
+			else if($expiredTimeout<$promotionDate ){
+				$alert = "<span class='error'>Ngày bắt đầu không được lớn hơn ngày kết thúc</span>";
+				return $alert;
+			}
+			else{
+				$result =$this->dbPromotion->insertOne(['product'=>$product,'PromotionPrice'=>$PromotionPrice,'PromotionDate'=>$promotionDate,'expiredTimeout'=>$expiredTimeout]);
 				if($result){
 					$alert = "<span class='success'>Thêm khuyến mãi thành công</span>";
 					return $alert;
@@ -547,8 +506,7 @@
 		}
         public function del_promotion($id)
 		{
-			$query = "DELETE FROM `tbl_promotion` where promotionId = '$id'";
-			$result = $this->db->delete($query);
+			$result = $this->dbPromotion->deleteOne(['_id'=>new MongoDB\BSON\ObjectId($id)]);
 			if($result){
 					$alert = "<span class='success'>Xóa khuyến mãi thành công</span>";
 					return $alert;
