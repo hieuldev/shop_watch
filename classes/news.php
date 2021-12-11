@@ -87,11 +87,11 @@ class news
         $img_size = $_FILES['newsImg']['size'];
         $img_temp = $_FILES['newsImg']['tmp_name'];
         if ($newsTitle == "" || $newsContent == "" || $newsType == "") {
-            $alert = "<span class='error'>file không được trống</span>";
+            $alert = "<span class='error'>Nội dung không được trống</span>";
             return $alert;
         } else {
             if ($_FILES['newsImg']['error'] > 0) {
-                $result = $this->db->updateOne(['_id' => new MongoDB\BSON\ObjectId($id)], ['$set' => ['newsTitle' => $newsTitle,'newsImg'=>$img_name, 'newsContent' => $newsContent, 'newsType' => $newsType]]);
+                $result = $this->db->updateOne(['_id' => new MongoDB\BSON\ObjectId($id)], ['$set' => ['newsTitle' => $newsTitle, 'newsContent' => $newsContent, 'newsType' => $newsType]]);
                 if ($result) {
                     $alert = "<span class='success'>Sửa tin tức thành công</span>";
                     return $alert;

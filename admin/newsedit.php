@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                     <label>Hình ảnh</label>
                                 </td>
                                 <td>
-                                    <img src="uploads/<?php echo $result['newsImg'] ?> with=100px">
+                                    <img src="uploads/<?php echo $getnewsid['newsImg'] ?> with=100px">
                                     <input name="newsImg" type="file" class="medium" />
                                 </td>
                             </tr>

@@ -16,7 +16,7 @@ if(!isset($_GET['newsID']) || $_GET['newsID'] == NULL){
 ?>
 <div class="grid_10">
     <div class="box round first grid">
-        <h2>Tất cả sản phẩm</h2>
+        <h2>Tất cả tin tức</h2>
         <div class="block">  
             <table class="data display datatable" id="example">
 			<thead>
