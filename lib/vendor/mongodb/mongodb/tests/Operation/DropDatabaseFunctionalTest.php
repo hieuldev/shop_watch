@@ -6,31 +6,10 @@ use MongoDB\Driver\Server;
 use MongoDB\Operation\DropDatabase;
 use MongoDB\Operation\InsertOne;
 use MongoDB\Operation\ListDatabases;
-use MongoDB\Tests\CommandObserver;
-
-use function sprintf;
-use function version_compare;
 
 class DropDatabaseFunctionalTest extends FunctionalTestCase
 {
-    public function testDefaultWriteConcernIsOmitted(): void
-    {
-        (new CommandObserver())->observe(
-            function (): void {
-                $operation = new DropDatabase(
-                    $this->getDatabaseName(),
-                    ['writeConcern' => $this->createDefaultWriteConcern()]
-                );
-
-                $operation->execute($this->getPrimaryServer());
-            },
-            function (array $event): void {
-                $this->assertObjectNotHasAttribute('writeConcern', $event['started']->getCommand());
-            }
-        );
-    }
-
-    public function testDropExistingDatabase(): void
+    public function testDropExistingDatabase()
     {
         $server = $this->getPrimaryServer();
 
@@ -47,7 +26,7 @@ class DropDatabaseFunctionalTest extends FunctionalTestCase
     /**
      * @depends testDropExistingDatabase
      */
-    public function testDropNonexistentDatabase(): void
+    public function testDropNonexistentDatabase()
     {
         $server = $this->getPrimaryServer();
 
@@ -60,34 +39,13 @@ class DropDatabaseFunctionalTest extends FunctionalTestCase
         $operation->execute($server);
     }
 
-    public function testSessionOption(): void
-    {
-        if (version_compare($this->getServerVersion(), '3.6.0', '<')) {
-            $this->markTestSkipped('Sessions are not supported');
-        }
-
-        (new CommandObserver())->observe(
-            function (): void {
-                $operation = new DropDatabase(
-                    $this->getDatabaseName(),
-                    ['session' => $this->createSession()]
-                );
-
-                $operation->execute($this->getPrimaryServer());
-            },
-            function (array $event): void {
-                $this->assertObjectHasAttribute('lsid', $event['started']->getCommand());
-            }
-        );
-    }
-
     /**
      * Asserts that a database with the given name does not exist on the server.
      *
      * @param Server $server
      * @param string $databaseName
      */
-    private function assertDatabaseDoesNotExist(Server $server, string $databaseName): void
+    private function assertDatabaseDoesNotExist(Server $server, $databaseName)
     {
         $operation = new ListDatabases();
         $databases = $operation->execute($server);

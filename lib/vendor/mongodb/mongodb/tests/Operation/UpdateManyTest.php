@@ -2,64 +2,34 @@
 
 namespace MongoDB\Tests\Operation;
 
-use MongoDB\Exception\InvalidArgumentException;
-use MongoDB\Model\BSONDocument;
 use MongoDB\Operation\UpdateMany;
 
 class UpdateManyTest extends TestCase
 {
     /**
+     * @expectedException MongoDB\Exception\InvalidArgumentException
      * @dataProvider provideInvalidDocumentValues
      */
-    public function testConstructorFilterArgumentTypeCheck($filter): void
+    public function testConstructorFilterArgumentTypeCheck($filter)
     {
-        $this->expectException(InvalidArgumentException::class);
         new UpdateMany($this->getDatabaseName(), $this->getCollectionName(), $filter, ['$set' => ['x' => 1]]);
     }
 
     /**
+     * @expectedException MongoDB\Exception\InvalidArgumentException
      * @dataProvider provideInvalidDocumentValues
      */
-    public function testConstructorUpdateArgumentTypeCheck($update): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-        new UpdateMany($this->getDatabaseName(), $this->getCollectionName(), ['x' => 1], $update);
-    }
-
-    /**
-     * @dataProvider provideUpdateDocuments
-     * @doesNotPerformAssertions
-     */
-    public function testConstructorUpdateArgument($update): void
+    public function testConstructorUpdateArgumentTypeCheck($update)
     {
         new UpdateMany($this->getDatabaseName(), $this->getCollectionName(), ['x' => 1], $update);
     }
 
     /**
-     * @dataProvider provideReplacementDocuments
+     * @expectedException MongoDB\Exception\InvalidArgumentException
+     * @expectedExceptionMessage First key in $update argument is not an update operator
      */
-    public function testConstructorUpdateArgumentRequiresOperators($replacement): void
+    public function testConstructorUpdateArgumentRequiresOperators()
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Expected an update document with operator as first key or a pipeline');
-        new UpdateMany($this->getDatabaseName(), $this->getCollectionName(), ['x' => 1], $replacement);
-    }
-
-    public function provideReplacementDocuments()
-    {
-        return $this->wrapValuesForDataProvider([
-            ['y' => 1],
-            (object) ['y' => 1],
-            new BSONDocument(['y' => 1]),
-        ]);
-    }
-
-    public function provideUpdateDocuments()
-    {
-        return $this->wrapValuesForDataProvider([
-            ['$set' => ['y' => 1]],
-            (object) ['$set' => ['y' => 1]],
-            new BSONDocument(['$set' => ['y' => 1]]),
-        ]);
+        new UpdateMany($this->getDatabaseName(), $this->getCollectionName(), ['x' => 1], ['y' => 1]);
     }
 }

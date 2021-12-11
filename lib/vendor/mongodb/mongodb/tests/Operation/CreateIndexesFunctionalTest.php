@@ -2,23 +2,17 @@
 
 namespace MongoDB\Tests\Operation;
 
-use InvalidArgumentException;
-use MongoDB\Driver\Exception\RuntimeException;
-use MongoDB\Driver\Server;
-use MongoDB\Exception\UnsupportedException;
 use MongoDB\Model\IndexInfo;
 use MongoDB\Operation\CreateIndexes;
+use MongoDB\Operation\DropIndexes;
 use MongoDB\Operation\ListIndexes;
-use MongoDB\Tests\CommandObserver;
-
-use function call_user_func;
-use function is_callable;
-use function sprintf;
-use function version_compare;
+use InvalidArgumentException;
 
 class CreateIndexesFunctionalTest extends FunctionalTestCase
 {
-    public function testCreateSparseUniqueIndex(): void
+    private static $wireVersionForCommand = 2;
+
+    public function testCreateSparseUniqueIndex()
     {
         $indexes = [['key' => ['x' => 1], 'sparse' => true, 'unique' => true]];
 
@@ -26,14 +20,14 @@ class CreateIndexesFunctionalTest extends FunctionalTestCase
         $createdIndexNames = $operation->execute($this->getPrimaryServer());
 
         $this->assertSame('x_1', $createdIndexNames[0]);
-        $this->assertIndexExists('x_1', function (IndexInfo $info): void {
+        $this->assertIndexExists('x_1', function(IndexInfo $info) {
             $this->assertTrue($info->isSparse());
             $this->assertTrue($info->isUnique());
             $this->assertFalse($info->isTtl());
         });
     }
 
-    public function testCreateCompoundIndex(): void
+    public function testCreateCompoundIndex()
     {
         $indexes = [['key' => ['y' => -1, 'z' => 1]]];
 
@@ -41,14 +35,14 @@ class CreateIndexesFunctionalTest extends FunctionalTestCase
         $createdIndexNames = $operation->execute($this->getPrimaryServer());
 
         $this->assertSame('y_-1_z_1', $createdIndexNames[0]);
-        $this->assertIndexExists('y_-1_z_1', function (IndexInfo $info): void {
+        $this->assertIndexExists('y_-1_z_1', function(IndexInfo $info) {
             $this->assertFalse($info->isSparse());
             $this->assertFalse($info->isUnique());
             $this->assertFalse($info->isTtl());
         });
     }
 
-    public function testCreateGeospatialIndex(): void
+    public function testCreateGeospatialIndex()
     {
         $indexes = [['key' => ['g' => '2dsphere', 'z' => 1]]];
 
@@ -56,14 +50,14 @@ class CreateIndexesFunctionalTest extends FunctionalTestCase
         $createdIndexNames = $operation->execute($this->getPrimaryServer());
 
         $this->assertSame('g_2dsphere_z_1', $createdIndexNames[0]);
-        $this->assertIndexExists('g_2dsphere_z_1', function (IndexInfo $info): void {
+        $this->assertIndexExists('g_2dsphere_z_1', function(IndexInfo $info) {
             $this->assertFalse($info->isSparse());
             $this->assertFalse($info->isUnique());
             $this->assertFalse($info->isTtl());
         });
     }
 
-    public function testCreateTTLIndex(): void
+    public function testCreateTTLIndex()
     {
         $indexes = [['key' => ['t' => 1], 'expireAfterSeconds' => 0, 'name' => 'my_ttl']];
 
@@ -71,14 +65,14 @@ class CreateIndexesFunctionalTest extends FunctionalTestCase
         $createdIndexNames = $operation->execute($this->getPrimaryServer());
 
         $this->assertSame('my_ttl', $createdIndexNames[0]);
-        $this->assertIndexExists('my_ttl', function (IndexInfo $info): void {
+        $this->assertIndexExists('my_ttl', function(IndexInfo $info) {
             $this->assertFalse($info->isSparse());
             $this->assertFalse($info->isUnique());
             $this->assertTrue($info->isTtl());
         });
     }
 
-    public function testCreateIndexes(): void
+    public function testCreateIndexes()
     {
         $expectedNames = ['x_1', 'y_-1_z_1', 'g_2dsphere_z_1', 'my_ttl'];
 
@@ -94,130 +88,73 @@ class CreateIndexesFunctionalTest extends FunctionalTestCase
 
         $this->assertSame($expectedNames, $createdIndexNames);
 
-        $this->assertIndexExists('x_1', function (IndexInfo $info): void {
+        $this->assertIndexExists('x_1', function(IndexInfo $info) {
             $this->assertTrue($info->isSparse());
             $this->assertTrue($info->isUnique());
             $this->assertFalse($info->isTtl());
         });
 
-        $this->assertIndexExists('y_-1_z_1', function (IndexInfo $info): void {
+        $this->assertIndexExists('y_-1_z_1', function(IndexInfo $info) {
             $this->assertFalse($info->isSparse());
             $this->assertFalse($info->isUnique());
             $this->assertFalse($info->isTtl());
         });
 
-        $this->assertIndexExists('g_2dsphere_z_1', function (IndexInfo $info): void {
+        $this->assertIndexExists('g_2dsphere_z_1', function(IndexInfo $info) {
             $this->assertFalse($info->isSparse());
             $this->assertFalse($info->isUnique());
             $this->assertFalse($info->isTtl());
         });
 
-        $this->assertIndexExists('my_ttl', function (IndexInfo $info): void {
+        $this->assertIndexExists('my_ttl', function(IndexInfo $info) {
             $this->assertFalse($info->isSparse());
             $this->assertFalse($info->isUnique());
             $this->assertTrue($info->isTtl());
         });
     }
 
-    public function testCreateConflictingIndexesWithCommand(): void
+    /**
+     * @expectedException MongoDB\Driver\Exception\RuntimeException
+     */
+    public function testCreateConflictingIndexesWithCommand()
     {
+        if ( ! \MongoDB\server_supports_feature($this->getPrimaryServer(), self::$wireVersionForCommand)) {
+            $this->markTestSkipped('createIndexes command is not supported');
+        }
+
         $indexes = [
             ['key' => ['x' => 1], 'sparse' => true, 'unique' => false],
             ['key' => ['x' => 1], 'sparse' => false, 'unique' => true],
         ];
 
         $operation = new CreateIndexes($this->getDatabaseName(), $this->getCollectionName(), $indexes);
-
-        $this->expectException(RuntimeException::class);
-        $operation->execute($this->getPrimaryServer());
+        $createdIndexNames = $operation->execute($this->getPrimaryServer());
     }
 
-    public function testDefaultWriteConcernIsOmitted(): void
+    public function testCreateConflictingIndexesWithLegacyInsert()
     {
-        (new CommandObserver())->observe(
-            function (): void {
-                $operation = new CreateIndexes(
-                    $this->getDatabaseName(),
-                    $this->getCollectionName(),
-                    [['key' => ['x' => 1]]],
-                    ['writeConcern' => $this->createDefaultWriteConcern()]
-                );
-
-                $operation->execute($this->getPrimaryServer());
-            },
-            function (array $event): void {
-                $this->assertObjectNotHasAttribute('writeConcern', $event['started']->getCommand());
-            }
-        );
-    }
-
-    public function testSessionOption(): void
-    {
-        if (version_compare($this->getServerVersion(), '3.6.0', '<')) {
-            $this->markTestSkipped('Sessions are not supported');
+        if (\MongoDB\server_supports_feature($this->getPrimaryServer(), self::$wireVersionForCommand)) {
+            $this->markTestSkipped('Index creation does not use legacy insertion');
         }
 
-        (new CommandObserver())->observe(
-            function (): void {
-                $operation = new CreateIndexes(
-                    $this->getDatabaseName(),
-                    $this->getCollectionName(),
-                    [['key' => ['x' => 1]]],
-                    ['session' => $this->createSession()]
-                );
+        $indexes = [
+            ['key' => ['x' => 1], 'sparse' => true, 'unique' => false],
+            ['key' => ['x' => 1], 'sparse' => false, 'unique' => true],
+        ];
 
-                $operation->execute($this->getPrimaryServer());
-            },
-            function (array $event): void {
-                $this->assertObjectHasAttribute('lsid', $event['started']->getCommand());
-            }
-        );
-    }
+        $operation = new CreateIndexes($this->getDatabaseName(), $this->getCollectionName(), $indexes);
+        $createdIndexNames = $operation->execute($this->getPrimaryServer());
 
-    public function testCommitQuorumOption(): void
-    {
-        if (version_compare($this->getServerVersion(), '4.3.4', '<')) {
-            $this->markTestSkipped('commitQuorum is not supported');
-        }
-
-        if ($this->getPrimaryServer()->getType() !== Server::TYPE_RS_PRIMARY) {
-            $this->markTestSkipped('commitQuorum is only supported on replica sets');
-        }
-
-        (new CommandObserver())->observe(
-            function (): void {
-                $operation = new CreateIndexes(
-                    $this->getDatabaseName(),
-                    $this->getCollectionName(),
-                    [['key' => ['x' => 1]]],
-                    ['commitQuorum' => 'majority']
-                );
-
-                $operation->execute($this->getPrimaryServer());
-            },
-            function (array $event): void {
-                $this->assertObjectHasAttribute('commitQuorum', $event['started']->getCommand());
-            }
-        );
-    }
-
-    public function testCommitQuorumUnsupported(): void
-    {
-        if (version_compare($this->getServerVersion(), '4.3.4', '>=')) {
-            $this->markTestSkipped('commitQuorum is supported');
-        }
-
-        $operation = new CreateIndexes(
-            $this->getDatabaseName(),
-            $this->getCollectionName(),
-            [['key' => ['x' => 1]]],
-            ['commitQuorum' => 'majority']
-        );
-
-        $this->expectException(UnsupportedException::class);
-        $this->expectExceptionMessage('The "commitQuorum" option is not supported by the server executing this operation');
-
-        $operation->execute($this->getPrimaryServer());
+        /* When creating indexes with legacy insert operations, the server
+         * ignores conflicting index specifications and leaves the original
+         * index in place.
+         */
+        $this->assertSame('x_1', $createdIndexNames[0]);
+        $this->assertIndexExists('x_1', function(IndexInfo $info) {
+            $this->assertTrue($info->isSparse());
+            $this->assertFalse($info->isUnique());
+            $this->assertFalse($info->isTtl());
+        });
     }
 
     /**
@@ -228,10 +165,9 @@ class CreateIndexesFunctionalTest extends FunctionalTestCase
      * given name is found, it will be passed to the callback, which may perform
      * additional assertions.
      *
-     * @param string   $indexName
      * @param callable $callback
      */
-    private function assertIndexExists(string $indexName, ?callable $callback = null): void
+    private function assertIndexExists($indexName, $callback = null)
     {
         if ($callback !== null && ! is_callable($callback)) {
             throw new InvalidArgumentException('$callback is not a callable');
@@ -249,7 +185,7 @@ class CreateIndexesFunctionalTest extends FunctionalTestCase
             }
         }
 
-        $this->assertNotNull($foundIndex, sprintf('Index %s does not exist', $indexName));
+        $this->assertNotNull($foundIndex, sprintf('Found %s index for the collection', $indexName));
 
         if ($callback !== null) {
             call_user_func($callback, $foundIndex);
