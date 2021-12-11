@@ -10,14 +10,15 @@ class news
     private $fm;
     public function __construct()
     {
-        $this->db = new Database();
+        $database = new Database();
+        $this->db = $database->data->tbl_news;
         $this->fm = new Format();
     }
     public function insert_news($data, $file)
     {
-        $newsTitle = mysqli_real_escape_string($this->db->link, $data['newsTitle']);
-        $newsContent = mysqli_real_escape_string($this->db->link, $data['newsContent']);
-        $type = mysqli_real_escape_string($this->db->link, $data['newsType']);
+        $newsTitle = $this->fm->validation($data['newsTitle']);
+        $newsContent = $this->fm->validation($data['newsContent']);
+        $newsType = $this->fm->validation($data['newsType']);
         $img_name = $_FILES['newsImg']['name'];
         $img_tmp = $_FILES['newsImg']['tmp_name'];
         if ($_FILES['newsImg']['error'] > 0) {
@@ -26,12 +27,12 @@ class news
         } else {
             move_uploaded_file($_FILES['newsImg']['tmp_name'], 'uploads/' . $_FILES['newsImg']['name']);
         }
-        if ($newsTitle == "" || $type == "" || $newsContent == "") {
+        if ($newsTitle == "" || $newsType == "" || $newsContent == "") {
             $alert = "<span class='error'>Hãy nhập đầy đủ</span>";
             return $alert;
         } else {
-            $query = "insert into tbl_news(newsTitle,newsImg,newsContent,newsType) values('$newsTitle','$img_name','$newsContent','$type')";
-            $result = $this->db->insert($query);
+            // $query = "insert into tbl_news(newsTitle,newsImg,newsContent,newsType) values('$newsTitle','$img_name','$newsContent','$type')";
+            $result = $this->db->insertOne(['newsTitle' => $newsTitle, 'newsImg' => $img_name, 'newsContent' => $newsContent, 'newsType' => $newsType]);
             if ($result) {
                 $alert = "<span class='success'>Nhập tin tức thành công</span>";
                 return $alert;
@@ -44,9 +45,9 @@ class news
     }
     public function news_showlist()
     {
-        $query =
-            "SELECT * FROM tbl_news";
-        $result = $this->db->select($query);
+        // $query =
+        //     "SELECT * FROM tbl_news";
+        $result = $result = $this->db->find();
         return $result;
     }
     public function show_flashnews()
@@ -70,46 +71,49 @@ class news
     }
     public function getnewsId($id)
     {
-        $query = "SELECT * FROM tbl_news where newsID= '$id' ";
-        $result = $this->db->select($query);
+        // $query = "SELECT * FROM tbl_news where newsID= '$id' ";
+        $result = $this->db->findOne(['_id'=>new MongoDB\BSON\ObjectId($id)]);
         return $result;
     }
     public function update_news($data, $file, $id)
     {
-        $newsTitle = mysqli_real_escape_string($this->db->link, $data['newsTitle']);
-        $newsContent = mysqli_real_escape_string($this->db->link, $data['newsContent']);
-        $type = mysqli_real_escape_string($this->db->link, $data['newsType']);
+        $newsTitle = $this->fm->validation($data['newsTitle']);
+        $newsContent = $this->fm->validation($data['newsContent']);
+        $newsType = $this->fm->validation($data['newsType']);
 
         // kiểm tra hình ảnh và lấy hình ảnh cho vào folder upload
         $permited = array('jpg', 'jpeg', 'png', 'gif');
         $img_name = $_FILES['newsImg']['name'];
         $img_size = $_FILES['newsImg']['size'];
         $img_temp = $_FILES['newsImg']['tmp_name'];
-        if ($newsTitle == "" || $newsContent == "" || $type == "") {
+        if ($newsTitle == "" || $newsContent == "" || $newsType == "") {
             $alert = "<span class='error'>file không được trống</span>";
             return $alert;
         } else {
             if ($_FILES['newsImg']['error'] > 0) {
-                $query = "UPDATE tbl_news SET newsTitle = '$newsTitle',newsContent = '$newsContent',newsType= '$type' WHERE newsID = '$id'";
+                $result = $this->db->updateOne(['_id' => new MongoDB\BSON\ObjectId($id)], ['$set' => ['newsTitle' => $newsTitle,'newsImg'=>$img_name, 'newsContent' => $newsContent, 'newsType' => $newsType]]);
+                if ($result) {
+                    $alert = "<span class='success'>Sửa tin tức thành công</span>";
+                    return $alert;
+                } else {
+                    $alert = "<span class='error'>Sửa tin tức thất bại</span>";
+                    return $alert;
+                }
             } else {
-                move_uploaded_file($_FILES['newsImg']['tmp_name'], 'uploads/' . $_FILES['newsImg']['name']);
-                $query = "UPDATE tbl_news SET newsTitle = '$newsTitle',newsImg='$img_name',newsContent = '$newsContent',newsType= '$type' WHERE newsID = '$id'";
+                $result = $this->db->updateOne(['_id' => new MongoDB\BSON\ObjectId($id)], ['$set' => ['newsTitle' => $newsTitle,'newsImg'=>$img_name, 'newsContent' => $newsContent, 'newsType' => $newsType]]);
+                if ($result) {
+                    $alert = "<span class='success'>Sửa tin tức thành công</span>";
+                    return $alert;
+                } else {
+                    $alert = "<span class='error'>Sửa tin tức thất bại</span>";
+                    return $alert;
+                }
             }
-        }
-
-        $result = $this->db->update($query);
-        if ($result) {
-            $alert = "<span class='success'>Sửa tin tức thành công</span>";
-            return $alert;
-        } else {
-            $alert = "<span class='error'>Sửa tin tức thất bại</span>";
-            return $alert;
         }
     }
     public function del_news($id)
     {
-        $query = "DELETE FROM tbl_news where newsID = '$id' ";
-        $result = $this->db->delete($query);
+        $result = $this->db->deleteOne(['_id'=>new MongoDB\BSON\ObjectId($id)]);
         if ($result) {
             $alert = "<span class='success'>Xóa tin tức thành công</span>";
             return $alert;
@@ -118,7 +122,7 @@ class news
             return $alert;
         }
     }
-    
+
     public function news_type()
     {
         $query = "SELECT DISTINCT newsType FROM tbl_news order by newsType desc ";
