@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                     <?php
                     $getnewsid = $news->getnewsId($id);
                     if ($getnewsid) {
-                        while ($result = $getnewsid->fetch_assoc()) {
+                        // while ($result = $getnewsid->fetch_assoc()) {
                             # code...
 
                     ?>
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                     <label>Tiêu đề</label>
                                 </td>
                                 <td>
-                                    <input name="newsTitle" type="text" value="<?php echo $result['newsTitle'] ?>" class="medium" />
+                                    <input name="newsTitle" type="text" value="<?php echo $getnewsid['newsTitle'] ?>" class="medium" />
                                 </td>
                             </tr>
                             <tr>
@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                     <label>Nội dung</label>
                                 </td>
                                 <td>
-                                    <textarea name="newsContent" class="tinymce"><?php echo $result['newsContent'] ?></textarea>
+                                    <textarea name="newsContent" class="tinymce"><?php echo $getnewsid['newsContent'] ?></textarea>
                                 </td>
                             </tr>
 
@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                 </td>
                             </tr>
                     <?php }
-                    } ?>
+                    ?>
                 </table>
             </form>
         </div>

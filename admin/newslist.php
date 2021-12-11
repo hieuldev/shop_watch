@@ -35,9 +35,9 @@ if(!isset($_GET['newsID']) || $_GET['newsID'] == NULL){
 							$newsList = $news -> news_showlist();
 							if($newsList){
 								$i = 0;
-								while($result = $newsList -> fetch_assoc()){
+								foreach ($newsList as $result) {
 									$i++;
-								
+								// while($result = $newsList -> fetch_assoc()){
 						?>
 				<tr class="odd gradeX">
 					<td><?php echo $i ?></td>
@@ -60,7 +60,7 @@ if(!isset($_GET['newsID']) || $_GET['newsID'] == NULL){
 						}
 
 					?></td>
-							<td><a href="newsedit.php?newsID=<?php echo $result['newsID'] ?>">Sửa</a> || <a href="?newsID=<?php echo $result['newsID'] ?>">Xóa</a></td>		
+							<td><a href="newsedit.php?newsID=<?php echo $result['_id'] ?>">Sửa</a> || <a href="?newsID=<?php echo $result['_id'] ?>">Xóa</a></td>		
 					<?php }}?>
 				</tr>
 			
