@@ -17,7 +17,8 @@
 		private $fm;
 		public function __construct()
 		{
-			$this->db = new Database();
+			$database=new Database();
+            $this->db=$database->data->tbl_cart;
 			$this->fm = new Format();
 		}
 		public function add_to_cart($id, $quantity)
