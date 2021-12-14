@@ -46,9 +46,9 @@
     	<div class="register_account">
     		<h3>Đăng ký tài khoản mới</h3>
             <?php
-            if(isset($insertcustommer))
+            if(isset($insertCustomer))
             {
-                echo $insertcustommer;
+                echo $insertCustomer;
             }
             ?>
     		<form action="" method="post">

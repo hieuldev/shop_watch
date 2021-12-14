@@ -37,8 +37,7 @@ class customer
 			$alert = "<span class='error'>Không được để trống</span>";
 			return $alert;
 		} else {
-			$check_email =$this->db->findOne(['email'=>$email]);
-			$result_check = $this->db->select($check_email);
+			$result_check = $this->db->findOne(['email'=>$email]);
 			if ($result_check) {
 				$alert = "<span class='error'>Địa chỉ Email đã tồn tại ? Hãy điền Email khác </span>";
 				return $alert;
@@ -65,10 +64,12 @@ class customer
 			//$check_login = "SELECT * FROM tbl_customer WHERE email='$email' AND password='$password' ";
 			$result_check = $this->db->findOne(['email'=>$email,'password'=>$password]);
 			if ($result_check) {
-				$value = $result_check->fetch_assoc();
+				// Session::set('adminlogin', true); // set adminlogin đã tồn tại
+				// 	 gọi function Checklogin để kiểm tra true.
+				// Session::set('adminId', $result['_id']);
 				Session::set('customer_login', true);
-				Session::set('customer_id', $value['customer_id']);
-				Session::set('customer_name', $value['name']);
+				Session::set('customer_id', $result_check['_id']);
+				Session::set('customer_name', $result_check['name']);
 				header('Location:index.php');
 			} else {
 				$alert = "<span class='error'>Email và password không trùng khớp</span>";
