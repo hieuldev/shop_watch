@@ -117,8 +117,7 @@
 
 		}
 		public function show_slider(){
-			$query = "SELECT * FROM tbl_slider where type='1' order by sliderId desc";
-			$result = $this->db->select($query);
+			$result=$this->dbSlider->find(['type'=>'1']);
 			return $result;
 		}
 		public function show_slider_list(){
@@ -287,8 +286,9 @@
                 $page=$_GET['page'];
             }
             $tung_trang=($page-1)*$sp_tungtrang;
-			$query = "SELECT * FROM tbl_product where type = '1' order by productId desc LIMIT $tung_trang,$sp_tungtrang ";
-			$result = $this->db->select($query);
+			// $query = "SELECT * FROM tbl_product where type = '1' order by productId desc LIMIT $tung_trang,$sp_tungtrang ";
+			// $result = $this->db->select($query);
+			$result=$this->db->find(['type'=>'1'],['limit'=>$sp_tungtrang,'skip'=>$tung_trang]);
 			return $result;
 		}
 		public function getproduct_new()
@@ -517,8 +517,9 @@
 		}
         public function get_promotion($id)
         {
-            $query = "SELECT * FROM tbl_promotion WHERE productId='$id' AND expiredTimeout>Now() ORDER BY PromotionDate DESC LIMIT 1";
-			$result = $this->db->select($query);
+            // $query = "SELECT * FROM tbl_promotion WHERE productId='$id' AND expiredTimeout>Now() ORDER BY PromotionDate DESC LIMIT 1";
+			// $result = $this->db->select($query);
+			$result=$this->dbPromotion->findOne(['product'=>$id,'expiredTimeout'=>date("Y-m-d H:i:s"),'PromotionDate'=>{$lte:date("Y-m-d H:i:s")}],['limit'=>1,'sort'=>['PromotionDate'=>-1]]);
             return $result;
         }
 		public function update_qty_product($id,$qty)
