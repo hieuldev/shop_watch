@@ -7,11 +7,11 @@
 		
                     $getall_category=$cat->show_category_fontend();
                     if($getall_category)
-                    {while($result_allcat= $getall_category->fetch_assoc())
+                    {foreach($getall_category as $result_allcat)
                     {
                     ?>
 					<ul>
-				      <li id="<?php echo $result_allcat['catId']?>" ><a href="productbycat.php?catid=<?php echo $result_allcat['catId']?>">
+				      <li id="<?php echo $result_allcat['_id']?>" ><a href="productbycat.php?catid=<?php echo $result_allcat['_id']?>">
                           <?php echo $result_allcat['catName']; ?></a></li>
 				      
     				</ul>
@@ -27,7 +27,7 @@
                         <?php 
 						$get_slider = $product->show_slider();
 						if ($get_slider) {
-							while ($result_slider = $get_slider->fetch_assoc()) {
+							foreach ( $get_slider as $result_slider) {
 								# code...
 							
 						 ?>
@@ -45,7 +45,7 @@
 			<?php
 			$show_img_news=$news->show_flashnews();
 			if($show_img_news)
-			{while($result=$show_img_news->fetch_assoc()){
+			{foreach($show_img_news as $result){
 			?>
 		<a href="newsdetails.php?id=<?php echo $result['newsID'] ?>"><img src="admin/uploads/<?php echo $result['newsImg']?>" title="<?php echo $result['newsTitle'] ?>" /></a>
 			<?php }}?>

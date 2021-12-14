@@ -78,16 +78,16 @@ header("Cache-Control: max-age=2592000");
 							<span class="cart_title">Giỏ hàng</span>
 							<span class="no_product">
 								<?php
-								$check_cart = $ct->check_cart();
-								if ($check_cart) {
-									$sum = Session::get("sum");
+								// $check_cart = $ct->check_cart();
+								// if ($check_cart) {
+								// 	$sum = Session::get("sum");
 
 
-									$qty = Session::get("qty");
-									echo "Sp:" . $qty ;
-								} else {
-									echo "Trống";
-								}
+								// 	$qty = Session::get("qty");
+								// 	echo "Sp:" . $qty ;
+								// } else {
+								// 	echo "Trống";
+								// }
 								?></span>
 
 						</a>
@@ -122,24 +122,24 @@ header("Cache-Control: max-age=2592000");
 				<li><a href="products.php">Sản phẩm</a> </li>
 				<li><a href="topbrands.php">Nhãn hiệu hàng đầu</a></li>
                 <?php
-                $check_cart=$ct->check_cart();
-                    if ($check_cart==false) {
-                echo '';}
-                else
-                {
-                    echo '<li><a href="cart.php">Giỏ hàng</a></li>';
-                }
+                // $check_cart=$ct->check_cart();
+                //     if ($check_cart==false) {
+                // echo '';}
+                // else
+                // {
+                //     echo '<li><a href="cart.php">Giỏ hàng</a></li>';
+                // }
             
                 ?>
                    <?php
-                $customer_id = Session::get('customer_id');
-                $check_order=$ct->check_order($customer_id);
-                    if ($check_order==false) {
-                echo '';}
-                else
-                {
-                    echo '<li><a href="orderdetails.php">Đơn hàng</a></li>';
-                }
+                // $customer_id = Session::get('customer_id');
+                // $check_order=$ct->check_order($customer_id);
+                //     if ($check_order==false) {
+                // echo '';}
+                // else
+                // {
+                //     echo '<li><a href="orderdetails.php">Đơn hàng</a></li>';
+                // }
             
                 ?>
 				<li><a href="news.php">Tin tức</a></li>

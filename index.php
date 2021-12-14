@@ -1,6 +1,6 @@
 <?php 
 	include 'inc/header.php';
-	include 'inc/slider.php';
+	//include 'inc/slider.php';
  ?>	
 
  <div class="main">
@@ -15,21 +15,20 @@
 	      	<?php 
 	      	$product_featheread = $product->getproduct_featheread();
 	      	if($product_featheread){
-	      		while ($result = $product_featheread->fetch_assoc()) {
+	      		foreach ($product_featheread as $result) {
 	      			      	
 	      	 ?>
 				<div class="grid_1_of_4 images_1_of_4">
-					 <a href="details.php?proid=<?php echo $result['productId'] ?>"><img src="admin/uploads/<?php echo $result['image'] ?>" alt="" /></a>
+					 <a href="details.php?proid=<?php echo $result['_id'] ?>"><img src="admin/uploads/<?php echo $result['image'] ?>" alt="" /></a>
 					 <h2><?php echo $result['productName'] ?></h2>
 					 <p><?php echo $fm->textShorten($result['product_desc'], 50) ?></p>
                      <?php
-                     $get_promotion = $product->get_promotion($result['productId']);
-	      	        if($get_promotion){
-	      		       if ($result2 = $get_promotion->fetch_assoc())
-                       {
-                           echo'<p><strike><span class="price">';echo $fm->format_currency($result['price'])." "."VND"; echo'</span></strike></p>';    echo'<p><span class="price">';echo $fm->format_currency($result2['PromotionPrice'])." "."VND"; echo'</span></p>'; 
-                        }
-                        
+                     $result2 = $product->get_promotion($result['productName']);
+	      	        if($result2){
+	      		      
+                           echo'<p><strike><span class="price">';echo $fm->format_currency($result['price'])." "."VND"; 
+						   echo'</span></strike></p>';  
+						 echo'<p><span class="price">';echo $fm->format_currency($result2['PromotionPrice'])." "."VND"; echo'</span></p>';                     
                         }
                     else
                         {

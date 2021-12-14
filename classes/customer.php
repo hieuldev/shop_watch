@@ -43,7 +43,7 @@ class customer
 				$alert = "<span class='error'>Địa chỉ Email đã tồn tại ? Hãy điền Email khác </span>";
 				return $alert;
 			} else {
-				$result = $this->db->insertOne(['name'=>$name,'city'=>$city,'zipcode'=>$zipcode,'email'=>$email,'address'=>$address,'country'=>$country,'phone'=>$phone,'password'=>$password]);
+				$result = $this->db->insertOne(['name'=>$name,'city'=>$city,'zipcode'=>$zipcode,'email'=>$email,'address'=>$address,'country'=>$country,'phone'=>$phone,'password'=>md5($password)]);
 				if ($result) {
 					$alert = "<span class='success'>Thêm khách hàng thành công</span>";
 					return $alert;

@@ -52,9 +52,7 @@ class news
     }
     public function show_flashnews()
     {
-        $query =
-            "SELECT * FROM tbl_news order by newsID desc limit 2";
-        $result = $this->db->select($query);
+        $result=$this->db->find([],['limit'=>2]);
         return $result;
     }
     public function del_newsid($id)
