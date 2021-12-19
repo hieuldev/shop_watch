@@ -25,6 +25,7 @@
                
                  <?php 
                     $get_customer = $cs->show_customers($id);
+                   
                     if($get_customer){
                         while ($result = $get_customer->fetch_assoc()) {
                             

@@ -14,6 +14,7 @@
 		private $dbWarehose;
 		private $dbSlider;
 		private $dbPromotion;
+		private $dbCart;
 		private $fm;
 		public function __construct()
 		{
@@ -22,6 +23,7 @@
 			$this->dbWarehose=$database->data->tbl_warehouse;
 			$this->dbSlider=$database->data->tbl_slider;
 			$this->dbPromotion=$database->data->tbl_promotion;
+			$this->dbCart=$database->data->tbl_order;
 			$this->fm = new Format();
 		}
 
@@ -30,11 +32,11 @@
 			$productName = $this->fm->validation( $data['productName']);
 			$product_code = $this->fm->validation( $data['product_code']);
 
-			$productQuantity = $this->fm->validation($data['productQuantity']);
+			$productQuantity = (int)$this->fm->validation($data['productQuantity']);
 			$category = $this->fm->validation( $data['category']);
 			$brand = $this->fm->validation( $data['brand']);
 			$product_desc = $this->fm->validation( $data['product_desc']);
-			$price = $this->fm->validation( $data['price']);
+			$price = (double)$this->fm->validation( $data['price']);
 			$type = $this->fm->validation( $data['type']);
 			 //mysqli gọi 2 biến. (catName and link) biến link -> gọi conect db từ file db
 			
@@ -49,7 +51,7 @@
 			$unique_image = substr(md5(time()), 0,10).'.'.$file_ext;
 			$uploaded_image = "uploads/".$unique_image;
 
-			if($product_code =="" || $productName == "" || $productQuantity == "" || $category == "" || $brand == "" || $product_desc == "" || $price == "" || $type == "" || $file_name == ""){
+			if($product_code =="" || $productName == "" || $category == "" || $brand == "" || $product_desc == "" ||  $type == "" || $file_name == ""|| $price == 0|| $product_desc == ""){
 				$alert = "<span class='error'>Không được để trống</span>";
 				return $alert;
 			}else{
@@ -139,9 +141,35 @@
 			return $result;
 		}
         
-		public function show_product()
+		public function show_product($search,$brand,$category)
 		{
-			$result = $this->db->find();
+			// for ($i = 15; $i < 20; $i++) {
+			// 	$result = $this->db->insertOne(['productName'=>"Sản phẩm".$i,'product_code'=>"ABC".$i,'product_remain'=>$i,'productQuantity'=>$i,'product_soldout'=>'0','cat'=>"Danh mục 2",'brand'=>'Đồng hồ 1','product_desc'=>'Sản phẩm mới','price'=>'10000','type'=>'1','image'=>'dongho.jfif']);
+			// }
+			$brand=trim($brand);
+			$category=trim($category);
+			if($brand!="Chọn thương hiệu"&&$category=="Chọn chuyên mục"&&$brand!=""&&$category!="")
+			{
+				$result=$this->db->find(array('productName'=> array('$regex' => $search),'brand'=>$brand));
+			}
+			else if($brand=="Chọn thương hiệu"&&$category!="Chọn chuyên mục"&&$brand!=""&&$category!="")
+			{
+				$result=$this->db->find(array('productName'=> array('$regex' => $search),'cat'=>$category));
+			}
+			else if($brand!="Chọn thương hiệu"&&$category!="Chọn chuyên mục"&&$brand!=""&&$category!="")
+			{
+				$result=$this->db->find(array('productName'=> array('$regex' => $search),'brand'=>$brand,'cat'=>$category));
+			}
+			else if($brand=="Chọn thương hiệu"&&$category=="Chọn chuyên mục"&&$search!=""&&$brand!=""&&$category!="")
+			{
+				$result=$this->db->find(array('productName'=> array('$regex' => $search)));
+			}
+			else
+			{
+				$result=$this->db->find();
+			}
+			//$result=$this->db->find([array(''brand'=>''));
+	
 			return $result;
 		}
 		public function update_type_slider($id,$type){
@@ -316,15 +344,7 @@
 		}
 		public function get_details($id)
 		{
-			$query = 
-			"SELECT tbl_product.*, tbl_category.catName, tbl_brand.brandName
-
-			 FROM tbl_product INNER JOIN tbl_category ON tbl_product.catId = tbl_category.catId
-								INNER JOIN tbl_brand ON tbl_product.brandId = tbl_brand.brandId
-			 WHERE tbl_product.productId = '$id'
-			 ";
-
-			$result = $this->db->select($query);
+			$result = $this->db->findOne(['_id'=>new MongoDB\BSON\ObjectId($id)]);
 			return $result;
 		}
 		public function allproduct($catId)
@@ -484,7 +504,6 @@
 			$promotionDate = $this->fm->validation( $data['PromotionDate']);
 			$expiredTimeout = $this->fm->validation( $data['expiredTimeout']);
 			
-
 			if($product =="" || $PromotionPrice == "" || $expiredTimeout == "" ){
 				$alert = "<span class='error'>Không được để trống</span>";
 				return $alert;
@@ -517,10 +536,13 @@
 		}
         public function get_promotion($id)
         {
+			//echo $id;
+			//$result=$this->dbPromotion->findOne(['product'=>$id,'expiredTimeout'=>array('$gte' =>date("Y-m-d H:i:s"))]);
             // $query = "SELECT * FROM tbl_promotion WHERE productId='$id' AND expiredTimeout>Now() ORDER BY PromotionDate DESC LIMIT 1";
 			// $result = $this->db->select($query);
-			$result=$this->dbPromotion->findOne(['product'=>$id,'expiredTimeout'=>date("Y-m-d H:i:s"),'PromotionDate'=>{$lte:date("Y-m-d H:i:s")}],['limit'=>1,'sort'=>['PromotionDate'=>-1]]);
-            return $result;
+			$result=$this->dbPromotion->findOne(['product'=>$id,'expiredTimeout'=>array('$gte' =>date("Y-m-d H:i:s")),'PromotionDate'=>array('$lte' =>date("Y-m-d H:i:s"))]);
+			 //$result=$this->dbPromotion->findOne([['product'=>$id,'expiredTimeout'=>array('$gte' =>date("Y-m-d H:i:s")),'PromotionDate'=>array('$lte' =>date("Y-m-d H:i:s"))],['limit'=>1,'sort'=>['PromotionDate'=>-1]]]);
+			 return $result;
         }
 		public function update_qty_product($id,$qty)
         {
@@ -528,5 +550,38 @@
 			$result = $this->db->update($query);
             return $result;
         }
+		public function totalproductbycat()
+		{
+			$data=$this->db->aggregate([
+				['$group' => ['_id' => '$cat', 'total' => ['$sum' => '$product_remain']]]
+			]);
+			return $data;
+		}
+		public function monthlyrevenue($m)
+		{
+			$year=date("Y");
+			//$list=$this->dbCart->find([ '$expr'=> [ '$eq'=> [[ '$month'=> '$DateSuccess' ], (int)$m]]]);
+			$list=$this->dbCart->aggregate([
+				[
+					'$redact'=> [
+						'$cond'=> [
+							[ 
+								'$and'=> [ 
+									[ '$eq'=> [ [ '$month'=> '$DateSuccess' ], (int)$m ] ],
+									[ '$eq'=> [ [ '$year'=> '$DateSuccess' ], (int)$year ] ]
+								] 
+								],
+							'$$KEEP',
+							'$$PRUNE'
+						]
+					]
+				]
+			]);
+			$sum=0;
+			foreach($list as $item){
+				$sum+=$item['TotalPrice'];
+			}
+			return $sum;
+		}
 	}
  ?>

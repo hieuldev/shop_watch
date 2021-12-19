@@ -23,20 +23,20 @@
 					 <h2><?php echo $result['productName'] ?></h2>
 					 <p><?php echo $fm->textShorten($result['product_desc'], 50) ?></p>
                      <?php
-                     $result2 = $product->get_promotion($result['productName']);
-	      	        if($result2){
+                    //  $result2 = $product->get_promotion($result['productName']);
+	      	        // if($result2){
 	      		      
-                           echo'<p><strike><span class="price">';echo $fm->format_currency($result['price'])." "."VND"; 
-						   echo'</span></strike></p>';  
-						 echo'<p><span class="price">';echo $fm->format_currency($result2['PromotionPrice'])." "."VND"; echo'</span></p>';                     
-                        }
-                    else
-                        {
+                    //        echo'<p><strike><span class="price">';echo $fm->format_currency($result['price'])." "."VND"; 
+					// 	   echo'</span></strike></p>';  
+					// 	 echo'<p><span class="price">';echo $fm->format_currency($result2['PromotionPrice'])." "."VND"; echo'</span></p>';                     
+                    //     }
+                    // else
+                    //     {
                             echo'<p><span class="price">';echo $fm->format_currency($result['price'])." "."VND"; echo'</span></p>'; 
-                        }
-                        ?>
+                        // }
+                        // ?>
                     
-				     <div class="button"><span><a href="details.php?proid=<?php echo $result['productId'] ?>" class="details">Chi tiết</a></span></div>
+				     <div class="button"><span><a href="details.php?proid=<?php echo $result['_id'] ?>" class="details">Chi tiết</a></span></div>
 				</div>
 				<?php 
 				}

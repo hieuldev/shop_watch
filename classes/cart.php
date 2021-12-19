@@ -18,14 +18,14 @@
 		public function __construct()
 		{
 			$database=new Database();
-            $this->db=$database->data->tbl_cart;
+            $this->db=$database->data->tbl_order;
 			$this->fm = new Format();
 		}
 		public function add_to_cart($id, $quantity)
 		{
 			$quantity = $this->fm->validation($quantity);
-			$quantity = mysqli_real_escape_string($this->db->link, $quantity);
-			$id = mysqli_real_escape_string($this->db->link, $id);
+			$quantity = $this->fm->validation( $quantity);
+			$id = $this->fm->validation( $id);
 			$sId = session_id();
             $query_check="SELECT * FROM tbl_promotion WHERE productId='$id' and expiredTimeout>Now()";
             $result_check = $this->db->select($query_check);
@@ -83,9 +83,9 @@
 		}
 		public function update_quantity_Cart($proId,$cartId, $quantity)
 		{
-			$quantity = mysqli_real_escape_string($this->db->link, $quantity);
-			$cartId = mysqli_real_escape_string($this->db->link, $cartId);
-			$proId = mysqli_real_escape_string($this->db->link, $proId);
+			$quantity = $this->fm->validation( $quantity);
+			$cartId = $this->fm->validation( $cartId);
+			$proId = $this->fm->validation( $proId);
 
 			$query_product = "SELECT * FROM tbl_product WHERE productId = '$proId' ";
 			$result_product = $this->db->select($query_product)->fetch_assoc();
@@ -110,7 +110,7 @@
 
 		}
 		public function del_product_cart($cartid){
-			$cartid = mysqli_real_escape_string($this->db->link, $cartid);
+			$cartid = $this->fm->validation( $cartid);
 			$query = "DELETE FROM tbl_cart WHERE cartId = '$cartid'";
 			$result = $this->db->delete($query);
 			if($result){
@@ -124,15 +124,17 @@
 		public function check_cart()
 		{
 			$sId = session_id();
-			$query = "SELECT * FROM tbl_cart WHERE sId = '$sId' ";
-			$result = $this->db->select($query);
+			//$query = "SELECT * FROM tbl_cart WHERE sId = '$sId' ";
+			//$result = $this->db->select($query);
+			$result=$this->db->findOne(['sId'=>$sId]);
 			return $result;
 		}
 		public function check_order($customer_id)
 		{
 			$sId = session_id();
-			$query = "SELECT * FROM tbl_order WHERE customer_id = '$customer_id' ";
-			$result = $this->db->select($query);
+			// $query = "SELECT * FROM tbl_order WHERE customer_id = '$customer_id' ";
+			// $result = $this->db->select($query);
+			$result=$this->db->findOne(['customer_id'=>$customer_id]);
 			return $result;
 		}
 		public function del_all_data_cart()
@@ -219,7 +221,7 @@
 		
 		public function shifted($id)
 		{
-			$id = mysqli_real_escape_string($this->db->link, $id);
+			$id = $this->fm->validation( $id);
 			$query = "UPDATE tbl_order SET
 
 			StatusId = '1'
@@ -238,7 +240,7 @@
 		}
         public function confirm($id)
 		{
-			$id = mysqli_real_escape_string($this->db->link, $id);
+			$id = $this->fm->validation( $id);
 			$query = "UPDATE tbl_order SET
 
 			StatusId = '2'
@@ -257,7 +259,7 @@
 		}
 		public function del_shifted($id)
 		{
-			$id = mysqli_real_escape_string($this->db->link, $id);
+			$id = $this->fm->validation( $id);
 			;
 			$query = "DELETE FROM tbl_order 
 					  WHERE id = '$id'";
@@ -273,9 +275,9 @@
 		}
 		public function shifted_confirm($id,$time,$price)
 		{
-			$id = mysqli_real_escape_string($this->db->link, $id);
-			$time = mysqli_real_escape_string($this->db->link, $time);
-			$price = mysqli_real_escape_string($this->db->link, $price);
+			$id = $this->fm->validation( $id);
+			$time = $this->fm->validation( $time);
+			$price = $this->fm->validation( $price);
 			$query = "UPDATE tbl_order SET
 
 			StatusId = '2'
@@ -302,6 +304,13 @@
 			return $result;
 		}
         
-        
+        public function insert_data(){
+			$query = 
+			"SELECT productId,productName,SUM(quantity) as quantity ,price FROM `tbl_order`,tbl_orderdetail WHERE tbl_order.id=tbl_orderdetail.id and  YEAR(date_order)=YEAR(Now()) and MONTH(date_order)=MONTH(Now()) GROUP by productId ORDER by quantity DESC";
+
+		
+			$result = $this->db->select($query);
+			return $result;
+		}
 	}
  ?>

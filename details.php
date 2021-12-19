@@ -9,17 +9,7 @@ include "inc/header.php";
       $id = $_GET['proid']; // Lấy productid trên host
    } 
 $customer_id=Session::get('customer_id');
-if($_SERVER['REQUEST_METHOD']=='POST'&&isset($_POST['compare']))
-{
-    $productid=$_POST['productid'];
-    $insertCompare=$product->insertCompare($productid,$customer_id);
-}
-$customer_id=Session::get('customer_id');
-if($_SERVER['REQUEST_METHOD']=='POST'&&isset($_POST['wishlist']))
-{
-    $productid=$_POST['productid'];
-    $insertWishlist=$product->insertWishlist($productid,$customer_id);
-}
+
 if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])){
         // LẤY DỮ LIỆU TỪ PHƯƠNG THỨC Ở FORM POST
         $quantity = $_POST['quantity'];
@@ -31,10 +21,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])){
     <div class="content">
     	<div class="section group">
 		<?php 
-    		$get_product_details = $product->get_details($id);
-    		if ($get_product_details) {
-    			while ($result_details = $get_product_details->fetch_assoc()) {
-    				# code...
+    		$result_details = $product->get_details($id);
+    		if ($result_details) {
     			
     		 ?>
             
@@ -47,22 +35,20 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])){
 					<p><?php echo $fm->textShorten($result_details['product_desc'],150);?></p>					
 					<div class="price">
                         <?php
-                     $get_promotion = $product->get_promotion($id);
-	      	        if($get_promotion){
-	      		       if ($result2 = $get_promotion->fetch_assoc())
-                       {
-                         echo'<p>Giá: <span>';echo $result2['PromotionPrice']." "."VND";; echo'</span></p>'; 
-                        }
+                    //  $result2 = $product->get_promotion($id);
+	      		    //    if ($result2)
+                    //    {
+                    //      echo'<p>Giá: <span>';echo $result2['PromotionPrice']." "."VND";; echo'</span></p>'; 
+                    //     }
                         
-                        }
-                    else
-                        {
+                    // else
+                    //     {
                             echo'<p>Giá: <span>';echo $result_details['price']." "."VND";; echo'</span></p>'; 
-                        }
+                        // }
                         ?>
 						
-						<p>Loại hàng: <span><?php echo $result_details['catName'];?></span></p>
-						<p>Thương hiệu:<span><?php echo $result_details['brandName'];?></span></p>
+						<p>Loại hàng: <span><?php echo $result_details['cat'];?></span></p>
+						<p>Thương hiệu:<span><?php echo $result_details['brand'];?></span></p>
 					</div>
 				<div class="add-cart">
                     
@@ -73,51 +59,21 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])){
 					</form>	
                     
                     <?php 
-						if (isset($insertCart)) {
-							echo '<span style="color:red; font-size:18px;">Sản phẩm đã được bạn thêm vào giỏ hàng</span>';
-						}
+						//if (isset($insertCart)) {
+						//	echo '<span style="color:red; font-size:18px;">Sản phẩm đã được bạn thêm vào giỏ hàng</span>';
+						//}
 					 ?>	 
                 </div>
-                <?php if(isset($insertCompare))
-                        {
-                            echo $insertCompare;
-                        }?>
-                        <?php if(isset($insertWishlist))
-                        {
-                            echo $insertWishlist;
-                        }?>
                     <div class="add-cart">
                         <div class="button_details">
 					<form action="" method="post">
 						
-                        <input type="hidden"  name="productid" value="<?php echo $result_details['productId'] ?>"/>
-                         <?php 
-	  $login_check = Session::get('customer_login');
-//if($login_check){
-//          echo '<input type="submit" class="buysubmit" name="compare" value="So sánh sản phẩm"/>';
-           
-//      }
-//                    else
-//                    {
-//                        echo '';
-//                    }?>
-                       
+                        <input type="hidden"  name="productid" value="<?php echo $result_details['_id'] ?>"/>
 					</form>	
                         <form action="" method="post">
 						
-                        <input type="hidden"  name="productid" value="<?php echo $result_details['productId'] ?>"/>
-                         <?php 
-	  $login_check = Session::get('customer_login');
-	  if($login_check){
-          
-           echo '<input type="submit" class="buysubmit" name="wishlist" value="Thêm vào danh sách yêu thích "/>';
-      }
-                    else
-                    {
-                        echo '';
-                    }?>
-                       
-					</form>	
+                        <input type="hidden"  name="productid" value="<?php echo $result_details['_id'] ?>"/>
+                         </form>	
 			</div>
                     </div>
 			<div class="product-desc">
@@ -127,7 +83,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])){
 				
 	</div>
             <?php 
-                }}
+}
             ?>
                     
  		</div>
@@ -136,11 +92,11 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])){
                     <?php 
                     $getall_category=$cat->show_category_fontend();
                     if($getall_category)
-                    {while($result_allcat= $getall_category->fetch_assoc())
+                    {foreach($getall_category as $result_allcat)
                     {
                     ?>
 					<ul>
-				      <li><a href="productbycat.php?catid=<?php echo $result_allcat['catId']; ?>">
+				      <li><a href="productbycat.php?catid=<?php echo $result_allcat['_id']; ?>">
                           <?php echo $result_allcat['catName']; ?></a></li>
 				      
     				</ul>

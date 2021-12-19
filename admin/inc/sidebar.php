@@ -42,9 +42,9 @@
                 </li>
                 <li><a class="menuitem">Báo cáo thống kê</a>
                     <ul class="submenu">
-                        <li><a href="importstatements.php">Thống kê nhập</a> </li>
-                        <li><a href="statisticsexport.php">Thống kê xuất</a> </li>
-                        <li><a href="manysales.php">Sản phẩm bán chạy</a> </li>
+                        <li><a href="productbycat.php">Thống kê sản phẩm theo danh mục</a> </li>
+                        <li><a href="customerInfor.php">Thống kê khách hàng</a> </li>
+                        <li><a href="monthlyrevenue.php">Thống kê doanh thu từng tháng</a> </li>
                     </ul>
                 </li>'
                 ?> 

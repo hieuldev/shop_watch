@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
                                 <option>Chọn sản phẩm</option>
                                 <?php
                                 $pd = new product();
-                                $pdlist = $pd->show_product();
+                              //  $pdlist = $pd->show_product();
                                 if ($pdlist) {
                                     foreach ($pdlist as $result) {
                                 ?>
